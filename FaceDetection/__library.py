@@ -1,5 +1,20 @@
 import math
 import numpy as np
+import json
+
+
+
+def get_json(result_facetype, result_eyetype, range_data):
+    output = {
+        "face_detected": "1",
+        "face_type": str(result_facetype),
+        "eye_type": str(result_eyetype),
+        "nose_type": str(range_data[0]),
+        "mouth_type": str(range_data[1]),
+        "chin_type": str(range_data[2]),
+        "cheek_type": str(range_data[3])
+    }
+    return json.dumps(output)
 
 
 def get_middle(ar1, ar2):

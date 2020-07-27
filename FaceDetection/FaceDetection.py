@@ -1,6 +1,6 @@
 import face_recognition
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 import FaceDetection.__regression as regression
 import FaceDetection.__library as library
 
@@ -47,8 +47,9 @@ class FaceDetection:
         pass
 
     def get_pic(self, image_path):
-        __image = face_recognition.load_image_file(image_path)
-        __face_landmarks_list = face_recognition.face_landmarks(__image, model="large")
+        self.x_size, self.y_size = FaceDetection.resizing_image(image_path)
+
+        __face_landmarks_list = self.get_facemarks(image_path)
 
         # face_recognition으로 추출한 특징을 개별분리한다.
         self.chin = __face_landmarks_list[0]['chin']
@@ -60,7 +61,36 @@ class FaceDetection:
         self.right_eye = __face_landmarks_list[0]['right_eye']
         self.top_lip = __face_landmarks_list[0]['top_lip']
         self.bottom_lip = __face_landmarks_list[0]['bottom_lip']
-        self.x_size, self.y_size = FaceDetection.get_image_xy(__image)
+
+    
+    def get_facemarks(self, image_path):
+        for i in range(4):
+            raw_pic = Image.open(image_path)
+            image_len = face_recognition.load_image_file(image_path)
+            face_return = face_recognition.face_landmarks(image_len, model="large")
+            if len(face_return) != 0:
+                break
+            raw_pic = raw_pic.transpose(Image.ROTATE_90)
+            raw_pic.save(image_path, "JPEG")
+        return face_return
+
+
+
+    @staticmethod
+    def resizing_image(image_path):
+        raw_pic = Image.open(image_path)
+        x_size, y_size = raw_pic.size
+        if x_size < 300:
+            pass
+        else:
+            x_y = y_size / x_size
+            x_size, y_size = 300, int(300 * x_y)
+            raw_pic = raw_pic.resize((x_size, y_size))
+        raw_pic = raw_pic.convert("RGB")
+        raw_pic.save(image_path, "JPEG")
+        return x_size, y_size
+
+        
 
     def get_points(self):
         garo_gradient = library.get_gradient(self.chin[0], self.chin[-1])
